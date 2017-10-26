@@ -4,4 +4,5 @@ Building a Telegram bot which recommends poems based on input strings
 
 # Data
 
-I have scraped 500 most popular poems from a web repository. The results are in .csv, with columns labelled as author, title, text.
+I have scraped the 500 most popular poems from a dedicated website. The results are in poems_collection.csv, with columns labelled as author, title, text.
+
