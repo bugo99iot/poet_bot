@@ -54,7 +54,7 @@ def poem(bot,update, args):
 
     t = "*" + target_poem[1].replace("<br/>","\n") + "*" + "\n" + "\n" + target_poem[0].replace("<br/>","\n").strip() + "\n" + "\n" + "_" + "by " + target_poem[2].replace("<br/>","\n") + "_"
     bot.sendMessage(chat_id=update.message.chat_id, text=t,parse_mode=telegram.ParseMode.MARKDOWN)
-    restart = "Wanna play again? Type /start to start again."
+    restart = "Wanna play again? Type /start to start again or just search for the next poem."    
     bot.sendMessage(chat_id=update.message.chat_id, text=restart,parse_mode=telegram.ParseMode.MARKDOWN)
 
 def error(bot, update, error):
