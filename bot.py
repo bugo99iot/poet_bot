@@ -30,7 +30,7 @@ def echo(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=t)
 
 def help(bot, update):
-    t = """Do you want to read a poem that talks about roses and wine?" + "\n" + "Type: /poem roses wine"""
+    t = "Would you like to read a poem about THE UNIVERSE!! " + "\n" + "Type: /poem universe"
     bot.sendMessage(chat_id=update.message.chat_id, text=t)
 
 def caps(bot, update, args):
