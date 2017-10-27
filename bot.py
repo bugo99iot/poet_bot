@@ -18,8 +18,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-token = "460636751:AAHxhE3ftINDzYKGw4OvuMHRVUy_cCEsbxw"
-admin = ["pseudo1", "pseudo2"]
+token = "yourtoken"
 
 def start(bot, update):
     print(update.message.chat.username)
