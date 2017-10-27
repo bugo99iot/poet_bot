@@ -9,3 +9,8 @@ I have scraped the 500 most popular poems from a dedicated website (see 'poems_s
 # Bot usage
 
 1) Create a Telegram account on your phone. 2) Connect to BotFather. 3) Create a bot with a given name. 4) Save your token. 5) Download the code from this repo to your local computer. 6) Replace your token in bot.py 7) Run 'python3 bot.py'. 8) Find your new bot on Telegram and have a chat :) 
+
+# License
+Released under version 2.0 of the [Apache License].
+
+[Apache license]: http://www.apache.org/licenses/LICENSE-2.0
