@@ -18,8 +18,13 @@ In case you would like to run the bot on your machine:
 
 Have a look at [this snapshot] to see what PoetBot looks like.
 
+# Blog
+
+I have written about this project on [Medium].
+
 # License
 Released under version 2.0 of the [Apache License].
 
 [Apache license]: http://www.apache.org/licenses/LICENSE-2.0
 [this snapshot]: https://github.com/bugo99iot/poet_bot/blob/master/snapbot1.jpg
+[Medium]: https://medium.com/@ugo.bertello/poetbot-2-a-telegram-chat-bot-for-poem-recommendation-70d1b809761c
