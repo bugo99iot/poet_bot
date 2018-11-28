@@ -6,7 +6,6 @@ logs/
 *.log
 *.ipynb_checkpoints
 *.Rhistory
-*.ipynb
 .hypothesis
 .pytest_cache
 
