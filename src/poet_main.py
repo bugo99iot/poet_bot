@@ -1,7 +1,4 @@
-from poet_class import Poet
-
-#performa a statistical and sentiment analysis of reviews parsed from the Internet Movie Data Base (IMDB)
-
+from src.poet_class import Poet
 
 user_input = "lgrgrgrgrgrg"
 

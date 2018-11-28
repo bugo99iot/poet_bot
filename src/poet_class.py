@@ -1,53 +1,41 @@
-# -*- coding: utf-8 -*-
-#useful telegram tutorial: https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets
-#useful code example: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/inlinebot.py
-#and: https://github.com/python-telegram-bot/python-telegram-bot/tree/master/examples
-
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import requests
-import json
-import datetime
-import time
 import pandas as pd
 import logging
-from poet_class import Poet
+from src.poet_class import Poet
 
-
-
+#import logger, this gives you info on terminal about what happens to the bot
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-token = "460636751:AAHxhE3ftINDzYKGw4OvuMHRVUy_cCEsbxw"
+#insert here the token delivered to you by BotFather
+token = "464737464hfgrjrgrf65734636djusdh746464JFHDHDEYD"
 
-#you can start PoetBot with command /start
+#this is the command you may tyoe in to restart PoetBot (pretty useless)
 def start(bot, update):
     print(update.message.chat.username)
     t = ("Hello %s, this is PoetBot. What kind of poem would you like to read?" + "\n" + "Type /poem followed by a list of key-words. If you struggle, type /help.") % update.message.chat.first_name
     bot.sendMessage(chat_id=update.message.chat_id, text=t)
 
-#poet bot will echo the previous message whatever the message from the user is
+#whatever you type into poet bot, he will echo the start message again and again (unless you use a command)
 def echo(bot, update):
     #t = update.message.text + " eccome"
     print(update.message.chat.username)
     t = ("Hello %s, this is PoetBot. What kind of poem would you like to read?" + "\n" + "Type /poem followed by a list of key-words. If you struggle, type /help.") % update.message.chat.first_name
     bot.send_message(chat_id=update.message.chat_id, text=t)
 
+#this defines the /help command
 def help(bot, update):
     t = "Would you like to read a poem about THE UNIVERSE!! " + "\n" + "Type: /poem universe"
     bot.sendMessage(chat_id=update.message.chat_id, text=t)
 
-def caps(bot, update, args):
-    text_caps = ' '.join(args).upper()
-    print(text_caps)
-    print(args)
-    bot.send_message(chat_id=update.message.chat_id, text=text_caps)
-
-
+#we upload the database containing all poems from which to choose
 df_poems = pd.read_csv("poems_collection.csv", header=None)
 
-def poem(bot,update, args):
+#we define a command to print a poem to Telegram
+#the command is used as follow: typing '/poem dinosaur' to the bot will print a poem about dinosaurs 
+def poem(bot, update, args):
     #args = str(' '.join(args))
     #print(type(args))
     print("user %s %s just requested a poem" % (update.message.chat.first_name,update.message.chat.last_name))
@@ -62,18 +50,19 @@ def poem(bot,update, args):
     restart = "Wanna play again? Type /start to start again or just search for the next poem."
     bot.sendMessage(chat_id=update.message.chat_id, text=restart,parse_mode=telegram.ParseMode.MARKDOWN)
 
+#defining a function printing errors
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
-
+#activate all commands and functions
 def main():
     updater = Updater(token=token)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('start', start))
+    #this one is for the echo function, slightly different from the others
     dp.add_handler(MessageHandler(Filters.text, echo))
-    #dp.add_handler(CommandHandler('caps', caps, pass_args=True))
     dp.add_handler(CommandHandler('poem', poem, pass_args=True))
     dp.add_handler(CommandHandler('help', help))
 

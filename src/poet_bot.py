@@ -1,11 +1,10 @@
 import pandas as pd
-import nltk
 from nltk.stem import PorterStemmer
 import re
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 import time
-from poet_class import Poet
+
 
 class color:
    PURPLE = '\033[95m'
