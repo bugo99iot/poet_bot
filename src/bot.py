@@ -1,62 +1,90 @@
-# -*- coding: utf-8 -*-
-#useful telegram tutorial: https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets
-#useful code example: https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/inlinebot.py
-#and: https://github.com/python-telegram-bot/python-telegram-bot/tree/master/examples
-
-import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import ReplyKeyboardMarkup
+from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
+                          ConversationHandler)
+from dotenv import load_dotenv, find_dotenv
 import pandas as pd
+import telegram
+
+from src.poet import Poet
+import nltk
+import os
+nltk.download('punkt')
+nltk.download('stopwords')
+
+load_dotenv(find_dotenv("env"))
+
+directory_path = os.path.dirname(os.path.realpath(__file__))
+
+df_tokenized = pd.read_csv(directory_path + "/scraper_ML/tokenized_poems.csv")
+df_poems = pd.read_csv(directory_path + "/scraper_ML/poems_collection.csv")
+
 import logging
-from src.poet_class import Poet
+import time
 
-
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+# Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-token = "460636751:AAHxhE3ftINDzYKGw4OvuMHRVUy_cCEsbxw"
+WANT_POEM_YES_NO, WANT_POEM_TOPIC = range(2)
 
-#you can start PoetBot with command /start
-def start(bot, update):
-    print(update.message.chat.username)
-    t = ("Hello %s, this is PoetBot. What kind of poem would you like to read?" + "\n" + "Type /poem followed by a list of key-words. If you struggle, type /help.") % update.message.chat.first_name
-    bot.sendMessage(chat_id=update.message.chat_id, text=t)
-
-#poet bot will echo the previous message whatever the message from the user is
-def echo(bot, update):
-    #t = update.message.text + " eccome"
-    print(update.message.chat.username)
-    t = ("Hello %s, this is PoetBot. What kind of poem would you like to read?" + "\n" + "Type /poem followed by a list of key-words. If you struggle, type /help.") % update.message.chat.first_name
-    bot.send_message(chat_id=update.message.chat_id, text=t)
-
-def help(bot, update):
-    t = "Would you like to read a poem about THE UNIVERSE!! " + "\n" + "Type: /poem universe"
-    bot.sendMessage(chat_id=update.message.chat_id, text=t)
-
-def caps(bot, update, args):
-    text_caps = ' '.join(args).upper()
-    print(text_caps)
-    print(args)
-    bot.send_message(chat_id=update.message.chat_id, text=text_caps)
+reply_keyboard = [['Age', 'Favourite colour'],
+                  ['Number of siblings', 'Something else...'],
+                  ['Done']]
+markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
 
-df_poems = pd.read_csv("poems_collection.csv", header=None)
+def start_conversation(bot, update):
 
-def poem(bot,update, args):
-    #args = str(' '.join(args))
-    #print(type(args))
-    print("user %s %s just requested a poem" % (update.message.chat.first_name,update.message.chat.last_name))
-    user_input = " ".join(args).strip()
-    #create instance of poet class
-    poet_object = Poet(user_input)
-    #get target poem
-    target_poem = poet_object.get_poem()
+    user_input = update.message.text
 
-    t = "*" + target_poem[1].replace("<br/>","\n") + "*" + "\n" + "\n" + target_poem[0].replace("<br/>","\n").strip() + "\n" + "\n" + "_" + "by " + target_poem[2].replace("<br/>","\n") + "_"
-    bot.sendMessage(chat_id=update.message.chat_id, text=t,parse_mode=telegram.ParseMode.MARKDOWN)
+    logging.warning(update.message.chat.first_name)
+    logging.warning(update.message.text)
+
+    t = ("Hello {}, this is PoetBot. Would you like to read a poem?".format(update.message.chat.first_name))
+
+    update.message.reply_text(text=t)
+
+    return WANT_POEM_YES_NO
+
+
+def want_poem_yes_no(bot, update):
+    text = update.message.text
+    if "yes" in text:
+        update.message.reply_text("Great! Topic?")
+        return WANT_POEM_TOPIC
+    else:
+        update.message.reply_text("Bummer!")
+        time.sleep(5)
+        return start_conversation(bot, update)
+
+
+def want_poem_topic(bot, update):
+
+    text = update.message.text
+    target_poem = Poet(text, df_poems=df_poems, df_tokenized=df_tokenized).get_poem
+
+    if target_poem is None:
+        update.message.reply_text("Sorry, could not find your poem. Try again.")
+        time.sleep(5)
+        return start_conversation(bot, update)
+
+    title, body, author = target_poem.get("title"), target_poem.get("body"), target_poem.get("author")
+
+    t = "*" + title.replace("<br/>", "\n") + "*" + "\n" + "\n" + body.replace("<br/>",
+                                                                              "\n").strip() + "\n" + "\n" + "_" + "by " + author.replace(
+        "<br/>", "\n") + "_"
+
+    bot.sendMessage(chat_id=update.message.chat_id, text=t,
+                    parse_mode=telegram.ParseMode.MARKDOWN)
+
+    #update.message.reply_text(text=t)
+
+    time.sleep(2)
     restart = "Wanna play again? Type /start to start again or just search for the next poem."
-    bot.sendMessage(chat_id=update.message.chat_id, text=restart,parse_mode=telegram.ParseMode.MARKDOWN)
+    return start_conversation(bot, update)
+
 
 def error(bot, update, error):
     """Log Errors caused by Updates."""
@@ -64,21 +92,45 @@ def error(bot, update, error):
 
 
 def main():
-    updater = Updater(token=token)
+    # Create the Updater and pass it your bot's token.
+    updater = Updater(token="739863186:AAGgESP4fYSAHs0uNV9isXdoibl3NRAgoMI")
+
+    # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(MessageHandler(Filters.text, echo))
-    #dp.add_handler(CommandHandler('caps', caps, pass_args=True))
-    dp.add_handler(CommandHandler('poem', poem, pass_args=True))
-    dp.add_handler(CommandHandler('help', help))
+    # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY
+    conv_handler = ConversationHandler(
+        entry_points=[MessageHandler(Filters.text, start_conversation)],
 
+        states={
+
+            WANT_POEM_YES_NO: [MessageHandler(Filters.text,
+                                          want_poem_yes_no)],
+            WANT_POEM_TOPIC: [MessageHandler(Filters.text,
+                                              want_poem_topic)],
+        },
+
+        fallbacks=[RegexHandler(Filters.text, start_conversation)]
+    )
+
+    #dp.add_handler(MessageHandler(Filters.text, start_conversation))
+
+    dp.add_handler(conv_handler)
+
+    # dp.add_handler(MessageHandler(Filters.text, converse))
+
+    # log all errors
     dp.add_error_handler(error)
 
+    # Start the Bot
     updater.start_polling()
 
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT. This should be used most of the time, since
+    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+

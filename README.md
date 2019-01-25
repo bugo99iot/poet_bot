@@ -1,4 +1,4 @@
-# poet_bot
+# Poet Bot
 
 Building a Telegram chatbot which recommends poems based on input strings.
 
